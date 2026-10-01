@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  STUDENT
+  ADMIN
+}
+
+enum SessionType {
+  AI_GD
+  LIVE_GD
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(STUDENT)
+  createdAt DateTime @default(now())
+  attempts  Attempt[]
+  sessions  GDSession[]
+}
+
+model AptitudeQuestion {
+  id          String   @id @default(cuid())
+  category    String
+  text        String
+  options     Json
+  answerIndex Int
+  explanation String?
+  createdAt   DateTime @default(now())
+}
+
+model Attempt {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  score       Float
+  total       Int
+  accuracy    Float
+  startedAt   DateTime
+  completedAt DateTime?
+}
+
+model GDSession {
+  id            String      @id @default(cuid())
+  userId        String
+  user         User         @relation(fields: [userId], references: [id])
+  type          SessionType
+  topic         String
+  durationSec   Int
+  transcript    Json
+  content       Float?
+  relevance     Float?
+  communication Float?
+  participation Float?
+  createdAt     DateTime    @default(now())
+}
